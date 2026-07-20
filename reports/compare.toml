@@ -1,0 +1,11 @@
+[paper]
+title = "Your Paper Title"
+
+# [[comparisons]]
+# name = "RL vs Rule on Generals"
+# x_axis = "wall_hours"
+# y_axis = "elo"
+# runs = [
+#     "runs/28_generals/ppo_v3/20260720_1423_a1b2c3d",
+#     "runs/28_generals/rule_expansionist/20260720_1500_b2c3d4",
+# ]

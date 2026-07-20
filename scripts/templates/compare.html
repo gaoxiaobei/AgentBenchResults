@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block content %}
+<h1>Paper Comparison</h1>
+<p class="text-muted mb-3">Configured from <code>reports/compare.toml</code>.</p>
+{% set comps=compare.get('comparisons',[]) %}
+{% if comps %}{% for comp in comps %}
+<div class="card mb-3"><div class="card-header"><h2>{{ comp.name }}</h2><span class="text-sm text-dim">X: {{ comp.x_axis }} &middot; Y: {{ comp.y_axis }}</span></div>
+{% set crl=[] %}{% for rp in comp.get('runs',[]) %}{% for r in runs %}{% if r.path==rp %}{% set _=crl.append(r) %}{% endif %}{% endfor %}{% endfor %}
+{% if crl %}<div class="chart-wrap"><canvas id="cmpChart{{ loop.index }}"></canvas></div>
+<div style="overflow-x:auto;margin-top:1rem"><table><thead><tr><th>Agent</th><th>Game</th><th>Type</th><th>{{ comp.x_axis|replace('_',' ')|title }}</th><th>{{ comp.y_axis|replace('_',' ')|title }}</th><th>Run</th></tr></thead><tbody>
+{% for cr in crl %}{% set xv=cr.metrics.get(comp.x_axis) %}{% set yv=cr.metrics.get(comp.y_axis) %}<tr><td><strong>{{ cr.agent }}</strong></td><td>{{ cr.game }}</td><td><span class="badge badge-{{ cr.type }}">{{ cr.type }}</span></td><td class="data">{{ fmt_num(xv) if xv is not none else '-' }}</td><td class="data">{{ fmt_num(yv) if yv is not none else '-' }}</td><td class="data text-dim">{{ cr.run_id[:16] }}&hellip;</td></tr>{% endfor %}</tbody></table></div>
+<script>(function(){var cm={{ tojson(crl|map(attribute='metrics')|list) }};var cf={{ tojson(crl) }};var xk={{ tojson(comp.x_axis) }};var yk={{ tojson(comp.y_axis) }};var ag={};cf.forEach(function(c,i){var a=c.agent;if(!ag[a])ag[a]=[];var x=cm[i][xk],y=cm[i][yk];if(x!==undefined&&y!==undefined&&x!==null&&y!==null)ag[a].push({x:x,y:y,run_id:c.run_id})});var sds=[];for(var a in ag){if(!ag.hasOwnProperty(a))continue;sds.push({label:a,data:ag[a],color:null})}if(sds.length>0)AgentBench.scatterChart('cmpChart{{ loop.index }}',sds,{scales:{x:{title:{display:true,text:{{ tojson(comp.x_axis|replace('_',' ')|title) }},color:'#9698A5'}},y:{title:{display:true,text:{{ tojson(comp.y_axis|replace('_',' ')|title) }},color:'#9698A5'}}}})})();</script>
+{% else %}<p class="empty-state">No matching runs found for this comparison.</p>{% endif %}</div>
+{% endfor %}{% else %}
+<div class="card"><p class="text-dim">No comparisons configured.</p><pre style="background:var(--bg);padding:1rem;border-radius:var(--radius-sm);overflow-x:auto;font-size:.8rem;color:var(--text-muted);margin-top:1rem">[paper]
+title = "Your Paper Title"
+
+[[comparisons]]
+name = "RL vs Rule on Generals"
+x_axis = "wall_hours"
+y_axis = "elo"
+runs = [
+    "runs/28_generals/ppo_v3/20260720_1423_a1b2c3d",
+    "runs/28_generals/rule_expansionist/20260720_1500_b2c3d4",
+]</pre></div>
+{% endif %}{% endblock %}

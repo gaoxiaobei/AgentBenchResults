@@ -1,0 +1,31 @@
+name: Aggregate and Publish
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install jinja2
+      - name: Aggregate registry
+        run: python scripts/aggregate.py --data-dir . --output registry.toml
+      - name: Build report site
+        run: python scripts/report_builder.py --data-dir . --output ./_site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+      - uses: actions/deploy-pages@v4
