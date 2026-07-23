@@ -112,7 +112,6 @@ static void go(int num, Point target, bool wantFlash) {
     int pcy = clampi((int)floor(pos.y), 0, H - 1);
     int tcx = clampi((int)floor(target.x), 0, W - 1);
     int tcy = clampi((int)floor(target.y), 0, H - 1);
-    const int *d = bfsFrom(tcx, tcy);
     const int dxa[4] = {1, -1, 0, 0}, dya[4] = {0, 0, 1, -1};
 
     if (wantFlash && canFlashU(num) && D0(pos, target) > flash_distance * 0.5) {
@@ -126,13 +125,16 @@ static void go(int num, Point target, bool wantFlash) {
 
     Point stepDest = pos;
     bool openArea = !wallNearCell(pcx, pcy, 2);
-    int curD = d[IDX(pcx, pcy)];
     if (openArea && D0(pos, target) > 0.01) {
         Point del = Point(target.x - pos.x, target.y - pos.y);
         double len = lenv(del);
         if (len > human_velocity) del = Point(del.x * human_velocity / len, del.y * human_velocity / len);
         stepDest = Point(pos.x + del.x, pos.y + del.y);
     } else {
+        // Dynamic carrier targets change every frame; build a route field only
+        // when walls prevent the cheap open-space steering above.
+        const int *d = bfsFrom(tcx, tcy);
+        int curD = d[IDX(pcx, pcy)];
         int best = -1, bestv = (curD < 0 ? (1 << 30) : curD);
         for (int k = 0; k < 4; ++k) {
             int nx = pcx + dxa[k], ny = pcy + dya[k];
@@ -431,28 +433,17 @@ void playerAI() {
             }
         } else if (D0(MU(i).position, ec.position) <= 30.0 ||
                    D0(MU(i).position, ec.position) < D0(MU(i).position, mc.position)) { // STEAL
-            if (i == 0) {
-                tgt = mc.position;
-            } else if (i == 1) {
+            if (i == 1) {
                 tgt = Point((mc.position.x + ec.position.x) * 0.5,
                             (mc.position.y + ec.position.y) * 0.5);
-            } else if (i == 4 && bonusTarget >= 0 &&
-                       D0(MU(i).position, logic->map.bonus_places[bonusTarget]) < 70.0) {
-                tgt = logic->map.bonus_places[bonusTarget];
-                wantFlash = D0(MU(i).position, tgt) > 16.0;
             } else {
                 tgt = ec.position;
                 wantFlash = D0(MU(i).position, tgt) > 18.0;
             }
-        } else { // PRESSURE: retain home and centre before advancing.
-            if (i == 0) {
-                tgt = mc.position;
-            } else if (i == 1) {
+        } else { // PRESSURE: four attackers, one route interceptor.
+            if (i == 1) {
                 tgt = Point((mc.position.x * 2.0 + ec.position.x) / 3.0,
                             (mc.position.y * 2.0 + ec.position.y) / 3.0);
-            } else if (i == 4 && bonusTarget >= 0) {
-                tgt = logic->map.bonus_places[bonusTarget];
-                wantFlash = D0(MU(i).position, tgt) > 16.0;
             } else {
                 tgt = ec.position;
                 wantFlash = D0(MU(i).position, tgt) > 18.0;

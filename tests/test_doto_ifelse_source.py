@@ -11,6 +11,10 @@ class DotoIfElseSourceTest(unittest.TestCase):
         source = SOURCE.read_text()
         for state in ("RECOVER", "ESCORT", "STEAL", "PRESSURE"):
             self.assertIn(state, source)
+        self.assertIn("PRESSURE: four attackers", source)
+        self.assertLess(
+            source.index("bool openArea"), source.index("const int *d = bfsFrom")
+        )
         self.assertNotIn("rand(", source)
         self.assertNotIn("srand(", source)
 
