@@ -1,0 +1,21 @@
+{
+  "result": {
+    "elapsed_s": 330.033504,
+    "error": "match timed out after 330 seconds",
+    "metrics": null,
+    "process_group": 1164253,
+    "replay_path": null,
+    "returncode": -15,
+    "status": "infra_error",
+    "supervisor_terminated": false
+  },
+  "schema": "agentbench-doto-match-v1",
+  "spec": {
+    "candidate_faction": 0,
+    "duration_s": 300,
+    "opponent": "public_a",
+    "repeat": 0,
+    "seed": 20260722,
+    "timeout_s": 330
+  }
+}

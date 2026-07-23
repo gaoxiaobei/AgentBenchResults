@@ -1,0 +1,19 @@
+[run]
+run_id = "20260722_1205_699d1054"
+game = "23_doto"
+agent = "public_a_reference"
+type = "eval"
+created = "2026-07-22T12:05:12Z"
+git_commit = "fedff51"
+started_at = 1784721912.1116896
+finished_at = 1784723192.7234461
+total_steps = 18000
+total_episodes = 3
+
+[config]
+profile = "standard"
+claim_level = "benchmark"
+duration_s = 300
+repeats = 1
+seed = 20260722
+candidate_input = "source"

@@ -166,7 +166,8 @@ def build_site(data_dir, output, template_dir=None):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(str(td)), autoescape=jinja2.select_autoescape(["html","xml"]))
     env.globals["fmt_num"] = _fmt_num
     env.globals["elo_color"] = _elo_color
-    env.globals["tojson"] = lambda o: json.dumps(o, ensure_ascii=False)
+    from markupsafe import Markup
+    env.globals["tojson"] = lambda o: Markup(json.dumps(o, ensure_ascii=False))
 
     op.mkdir(parents=True, exist_ok=True)
     (op / "assets").mkdir(exist_ok=True)
