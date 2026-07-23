@@ -12,9 +12,9 @@ must not use search, learned policies, randomness, or external runtime input.
 
 - Read and use only `AgentBenchFramework` and `AgentBenchResults`; do not read
   `AgentBench`.
-- Modify only the candidate source in
-  `AgentBenchFramework/benchmarks/23_doto/agents/ifelse_supreme/playerAI.cpp`
-  for strategy changes.
+- Maintain the candidate source in
+  `AgentBenchResults/agents/doto_ifelse_strength/playerAI.cpp` and pass that
+  source path to the framework; the framework itself remains unchanged.
 - Preserve the framework evaluator and the legal result schema.
 - Produce a fresh framework-generated standard-profile result directory under
   `AgentBenchResults/runs/23_doto/ifelse_supreme/` without overwriting existing

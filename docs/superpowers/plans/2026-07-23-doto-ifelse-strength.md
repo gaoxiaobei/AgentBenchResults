@@ -12,7 +12,9 @@
 
 - Read only `AgentBenchFramework` and `AgentBenchResults`; never read `AgentBench`.
 - The candidate must remain deterministic and pure if-else: helpers/static match state are allowed; search, learned policies, randomness, and external runtime input are forbidden.
-- Preserve the evaluator and generate results through `benchmarks/23_doto/run.py --data-dir /home/six/Documents/THU/activities/SAST/AgentBenchResults`.
+- Preserve the evaluator, maintain the candidate at
+  `agents/doto_ifelse_strength/playerAI.cpp`, and generate results through
+  `benchmarks/23_doto/run.py --data-dir /home/six/Documents/THU/activities/SAST/AgentBenchResults`.
 - Do not overwrite existing result runs or hand-author evaluation metadata.
 
 ---
@@ -20,7 +22,7 @@
 ### Task 1: Establish reproducible route and build evidence
 
 **Files:**
-- Modify: `AgentBenchFramework/benchmarks/23_doto/agents/ifelse_supreme/playerAI.cpp`
+- Create: `AgentBenchResults/agents/doto_ifelse_strength/playerAI.cpp`
 - Test: `AgentBenchFramework/benchmarks/23_doto/tests/test_build.py`
 
 **Interfaces:**
@@ -44,7 +46,7 @@ Expected: all build tests pass, including `test_builds_public_a_source_with_the_
 - [ ] **Step 3: Add a failing source-contract test if the existing suite lacks one**
 
 Add a test that calls `build_candidate` on
-`agents/ifelse_supreme/playerAI.cpp`, asserting that the artifact is executable
+`agents/doto_ifelse_strength/playerAI.cpp`, asserting that the artifact is executable
 and that `build/candidate/build.json` exists. The test body is:
 
 ```python
@@ -66,7 +68,7 @@ if it does not, stop and repair compilation before changing tactics.
 ### Task 2: Replace all-in rushing with state-priority roles
 
 **Files:**
-- Modify: `AgentBenchFramework/benchmarks/23_doto/agents/ifelse_supreme/playerAI.cpp:172-473`
+- Modify: `AgentBenchResults/agents/doto_ifelse_strength/playerAI.cpp`
 - Test: `AgentBenchFramework/benchmarks/23_doto/tests/test_build.py`
 
 **Interfaces:**
