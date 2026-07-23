@@ -1,0 +1,19 @@
+[run]
+run_id = "20260723_0935_4fbff88f"
+game = "23_doto"
+agent = "ifelse_supreme"
+type = "eval"
+created = "2026-07-23T09:35:50Z"
+git_commit = "fedff51"
+started_at = 1784799350.6586552
+finished_at = 1784800607.3678844
+total_steps = 24000
+total_episodes = 4
+
+[config]
+profile = "standard"
+claim_level = "benchmark"
+duration_s = 300
+repeats = 1
+seed = 20260723
+candidate_input = "source"

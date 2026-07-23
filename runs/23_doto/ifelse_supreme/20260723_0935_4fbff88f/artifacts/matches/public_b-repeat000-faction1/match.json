@@ -1,0 +1,29 @@
+{
+  "result": {
+    "elapsed_s": 314.123567,
+    "error": null,
+    "metrics": {
+      "candidate_score": 14.833333333333334,
+      "deaths": 43,
+      "frames": 6000,
+      "goals": 0,
+      "opponent_score": 1274.1666666666665,
+      "pickups": 0,
+      "result": "loss"
+    },
+    "process_group": 361529,
+    "replay_path": "/home/six/Documents/THU/activities/SAST/AgentBenchResults/runs/23_doto/ifelse_supreme/20260723_0935_4fbff88f/artifacts/matches/public_b-repeat000-faction1/replay.zip",
+    "returncode": -15,
+    "status": "valid",
+    "supervisor_terminated": true
+  },
+  "schema": "agentbench-doto-match-v1",
+  "spec": {
+    "candidate_faction": 1,
+    "duration_s": 300,
+    "opponent": "public_b",
+    "repeat": 0,
+    "seed": 20260723,
+    "timeout_s": 330
+  }
+}
