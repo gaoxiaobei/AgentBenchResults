@@ -125,8 +125,7 @@ static void go(int num, Point target, bool wantFlash) {
 
     Point stepDest = pos;
     bool openArea = !wallNearCell(pcx, pcy, 2);
-    if (openArea && D0(pos, target) > 0.01 &&
-        (myFac() == 0 || D0(pos, target) <= 20.0)) {
+    if (openArea && D0(pos, target) > 0.01) {
         Point del = Point(target.x - pos.x, target.y - pos.y);
         double len = lenv(del);
         if (len > human_velocity) del = Point(del.x * human_velocity / len, del.y * human_velocity / len);
@@ -259,16 +258,17 @@ static int nearestEnemy(const Point &p) {
     return best;
 }
 
-// Public opponents repeatedly use the map's central corridor.  Following the
-// same symmetric staging sequence prevents the faction-1 direct-line stall.
-static Point attackWaypoint(int num, const Point &enemyCrystal) {
-    if (myFac() == 0) return enemyCrystal;
-    // These are the passable entrances to the two crystal rooms.  A point
-    // obtained by interpolating toward the crystal can fall inside a wall.
-    Point staging = enFac() == 0 ? Point(82.5, 70.0) : Point(237.5, 262.0);
+static Point crystalRunnerTarget(int num, const Crystal &enemyCrystal) {
     Point pos = MU(num).position;
-    if (D0(pos, staging) > 18.0) return staging;
-    return enemyCrystal;
+    Point ownCrystal = logic->map.crystal_places[myFac()];
+    Point center = Point(170.0, 150.0);
+    Point approach = enFac() == 0 ? Point(82.5, 70.0)
+                                  : Point(237.5, 262.0);
+    if (D0(ownCrystal, pos) < D0(ownCrystal, center) - 8.0)
+        return center;
+    if (D0(pos, approach) > 15.0)
+        return approach;
+    return enemyCrystal.position;
 }
 
 // ---- Fireball Combat ----
@@ -362,18 +362,6 @@ static bool threatened(const Point &p, Point &safeOut) {
         if (m.from_number % logic->map.faction_number == myFac()) continue;
         if (D0(m.position, p) <= explode_radius + 1.8 && m.last_time > 0 && m.last_time <= 25) under = true;
     }
-    // Public-b fires continuous volleys.  Look several frames down each
-    // hostile trajectory, rather than waiting for the impact frame.
-    for (size_t i = 0; i < logic->fireballs.size(); ++i) {
-        const Fireball &f = logic->fireballs[i];
-        if (f.from_number % logic->map.faction_number == myFac()) continue;
-        double vx = cos(f.rotation) * fireball_velocity;
-        double vy = sin(f.rotation) * fireball_velocity;
-        for (int t = 1; t <= 2; ++t) {
-            Point fp = Point(f.position.x + vx * t, f.position.y + vy * t);
-            if (D0(fp, p) <= fireball_radius + human_velocity + 0.3) under = true;
-        }
-    }
     if (!under) return false;
 
     int pcx = (int)floor(p.x), pcy = (int)floor(p.y);
@@ -388,16 +376,6 @@ static bool threatened(const Point &p, Point &safeOut) {
                 const Meteor &m = logic->meteors[i];
                 if (m.from_number % logic->map.faction_number == myFac()) continue;
                 if (D0(m.position, c) <= explode_radius + 1.2) { ok = false; break; }
-            }
-            for (size_t i = 0; ok && i < logic->fireballs.size(); ++i) {
-                const Fireball &f = logic->fireballs[i];
-                if (f.from_number % logic->map.faction_number == myFac()) continue;
-                double vx = cos(f.rotation) * fireball_velocity;
-                double vy = sin(f.rotation) * fireball_velocity;
-                for (int t = 1; t <= 2; ++t) {
-                    Point fp = Point(f.position.x + vx * t, f.position.y + vy * t);
-                    if (D0(fp, c) <= fireball_radius + 0.8) { ok = false; break; }
-                }
             }
             if (ok) { safeOut = c; return true; }
         }
@@ -426,30 +404,28 @@ void playerAI() {
     bool alive[8] = {false};
     for (int i = 0; i < HN; ++i) alive[i] = (MU(i).death_time == -1);
 
-    // Pick a bonus rune target if active and near
-    int bonusTarget = -1;
-    for (size_t b = 0; b < logic->bonus.size(); ++b) {
-        if (logic->bonus[b]) { bonusTarget = (int)b; break; }
-    }
-    int bonusRunner = -1;
-    if (bonusTarget >= 0 && carrier < 0 && enc < 0) {
-        double best = 26.0;
-        for (int i = 0; i < HN; ++i) {
-            if (!alive[i]) continue;
-            double dd = D0(MU(i).position, logic->map.bonus_places[bonusTarget]);
-            if (dd < best) { best = dd; bonusRunner = i; }
+    int attackLeader = -1;
+    double leaderScore = 1e30;
+    for (int i = 2; i < HN; ++i) {
+        if (!alive[i]) continue;
+        double dd = D0(MU(i).position, ec.position) - MU(i).hp * 0.8;
+        if (dd < leaderScore) {
+            leaderScore = dd;
+            attackLeader = i;
         }
     }
 
-    // Role assignment: never let the normal state turn into a five-unit rush.
+    // Role assignment: emergencies use the whole team; normal play mirrors the
+    // strong opponent's two bonus controllers plus three crystal runners.
     for (int i = 0; i < HN; ++i) {
         if (!alive[i]) continue;
         Point tgt;
         bool wantFlash = false;
 
-        if (i == bonusRunner) { // RUNE: opportunistic pickup, never a long detour.
-            tgt = logic->map.bonus_places[bonusTarget];
-            wantFlash = D0(MU(i).position, tgt) > 18.0;
+        if (i == carrier) {
+            // TRANSPORT OVERRIDE: possession outranks recovery when both
+            // crystals are moving.
+            tgt = myTarget;
         } else if (enc >= 0) { // RECOVER: carrier cannot flash, so own the route.
             Human e = EU(enc);
             int rank = 0;
@@ -467,10 +443,7 @@ void playerAI() {
             } else {
                 tgt = mc.position;
             }
-        } else if (carrier >= 0) { // ESCORT: carrier, lead, rear, screen.
-            if (i == carrier) {
-                tgt = myTarget;
-            } else {
+        } else if (carrier >= 0) { // ESCORT: lead, rear, and screen.
             Point cp = MU(carrier).position;
             int roleOffset = (i - carrier + HN) % HN;
             if (roleOffset == 1) {
@@ -485,28 +458,36 @@ void playerAI() {
                 else tgt = Point(cp.x + (myTarget.x - cp.x) * 0.2, cp.y + (myTarget.y - cp.y) * 0.2);
             }
             wantFlash = D0(MU(i).position, tgt) > 18.0;
-            }
-        } else if (myFac() == 1 && (i == 0 || i == 1)) { // GUARD: faction-1 room entry denial.
-            double side = myFac() == 0 ? 1.0 : -1.0;
-            if (i == 0) tgt = mc.position;
-            else tgt = Point(mc.position.x + side * 11.0, mc.position.y + side * 11.0);
-        } else if (D0(MU(i).position, ec.position) <= 30.0 ||
-                   D0(MU(i).position, ec.position) < D0(MU(i).position, mc.position)) { // STEAL
-            if (i == 1) {
-                tgt = Point((mc.position.x + ec.position.x) * 0.5,
-                            (mc.position.y + ec.position.y) * 0.5);
+        } else if (i < 2 && (size_t)i < logic->map.bonus_places.size()) {
+            // BONUS CONTROL: mirror the strong opponent's persistent economy.
+            tgt = logic->map.bonus_places[i];
+            wantFlash = D0(MU(i).position, tgt) > 18.0;
+        } else { // ATTACK: three armed crystal runners.
+            if (i == attackLeader || attackLeader < 0) {
+                tgt = crystalRunnerTarget(i, ec);
             } else {
-                tgt = attackWaypoint(i, ec.position);
-                wantFlash = D0(MU(i).position, tgt) > 18.0;
+                // ATTACK SUPPORT: screen the leader instead of stacking three
+                // units on the same lethal path.
+                int ne = nearestEnemy(MU(attackLeader).position);
+                if (ne >= 0) {
+                    Point base = EU(ne).position;
+                    Point lead = MU(attackLeader).position;
+                    Point dir = Point(base.x - lead.x, base.y - lead.y);
+                    double dl = lenv(dir);
+                    int supportRank = 0;
+                    for (int j = 2; j < i; ++j)
+                        if (alive[j] && j != attackLeader) ++supportRank;
+                    double side = supportRank == 0 ? -12.0 : 12.0;
+                    Point flank = dl > 0.1
+                        ? Point(base.x - dir.y * side / dl,
+                                base.y + dir.x * side / dl)
+                        : base;
+                    tgt = validPt(flank) ? flank : base;
+                } else {
+                    tgt = MU(attackLeader).position;
+                }
             }
-        } else { // PRESSURE: four attackers, one route interceptor.
-            if (i == 1) {
-                tgt = Point((mc.position.x * 2.0 + ec.position.x) / 3.0,
-                            (mc.position.y * 2.0 + ec.position.y) / 3.0);
-            } else {
-                tgt = attackWaypoint(i, ec.position);
-                wantFlash = D0(MU(i).position, tgt) > 18.0;
-            }
+            wantFlash = D0(MU(i).position, tgt) > 18.0;
         }
 
         // Sub-frame meteor evasion check
@@ -523,9 +504,7 @@ void playerAI() {
         }
 
         doFire(i);
-        // The room-entry prediction is needed only for the two guards.  The
-        // other units retain cheap local cluster targeting while attacking.
-        Point mt = (i <= 1) ? pickMeteorTarget(i, enc) : Point(-1, -1);
+        Point mt = pickMeteorTarget(i, enc);
         if (mt.x >= 0) castMeteor(i, mt);
     }
 }
