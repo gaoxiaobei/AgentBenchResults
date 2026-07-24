@@ -1,0 +1,420 @@
+{
+  "candidate_faction": 1,
+  "candidate_score": 14.833333333333334,
+  "death_heatmap": [
+    {
+      "cell": [
+        9,
+        9
+      ],
+      "count": 9
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "count": 6
+    },
+    {
+      "cell": [
+        7,
+        7
+      ],
+      "count": 4
+    },
+    {
+      "cell": [
+        8,
+        8
+      ],
+      "count": 4
+    },
+    {
+      "cell": [
+        9,
+        10
+      ],
+      "count": 4
+    },
+    {
+      "cell": [
+        9,
+        11
+      ],
+      "count": 4
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "count": 3
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        8,
+        6
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        8,
+        7
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        9,
+        7
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        9,
+        8
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        10,
+        10
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        10,
+        11
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        10,
+        12
+      ],
+      "count": 1
+    },
+    {
+      "cell": [
+        11,
+        12
+      ],
+      "count": 1
+    }
+  ],
+  "final_scores": [
+    1274.1666666666665,
+    14.833333333333334
+  ],
+  "frames": 6000,
+  "grid_size": 20.0,
+  "nearest_ball_distance": {
+    "mean": 68.574778,
+    "p50": 40.65907,
+    "p90": 191.997815,
+    "samples": 23555
+  },
+  "nearest_enemy_distance": {
+    "mean": 56.09637,
+    "p50": 29.492945,
+    "p90": 142.566692,
+    "samples": 23555
+  },
+  "opponent_score": 1274.1666666666665,
+  "replay": "/home/six/Documents/THU/activities/SAST/AgentBenchResults/runs/23_doto/ifelse_supreme/20260723_0935_4fbff88f/artifacts/matches/public_b-repeat000-faction1/replay.zip",
+  "route_revisit_ratio": 0.993759,
+  "top_occupancy_cells": [
+    {
+      "cell": [
+        9,
+        10
+      ],
+      "frames": 2585
+    },
+    {
+      "cell": [
+        10,
+        12
+      ],
+      "frames": 2130
+    },
+    {
+      "cell": [
+        9,
+        9
+      ],
+      "frames": 1694
+    },
+    {
+      "cell": [
+        9,
+        11
+      ],
+      "frames": 1620
+    },
+    {
+      "cell": [
+        8,
+        8
+      ],
+      "frames": 1556
+    }
+  ],
+  "units": [
+    {
+      "alive_frames": 4720,
+      "alive_ratio": 0.786667,
+      "ball_carry_frames": 0,
+      "death_positions": [
+        [
+          177.5,
+          175.5
+        ],
+        [
+          167.938,
+          125.664
+        ],
+        [
+          209.265,
+          239.709
+        ],
+        [
+          190.5,
+          149.633
+        ],
+        [
+          213.339,
+          249.985
+        ],
+        [
+          228.126,
+          246.457
+        ],
+        [
+          153.825,
+          146.583
+        ],
+        [
+          134.348,
+          106.652
+        ]
+      ],
+      "deaths": 8,
+      "distance_travelled": 3027.798858,
+      "enemy_crystal_closest_frame": 1418,
+      "enemy_crystal_closest_hp": 35.0,
+      "enemy_crystal_min_distance": 49.802845,
+      "number": 1,
+      "stationary_ratio": 0.067714
+    },
+    {
+      "alive_frames": 4720,
+      "alive_ratio": 0.786667,
+      "ball_carry_frames": 0,
+      "death_positions": [
+        [
+          194.653,
+          226.604
+        ],
+        [
+          189.205,
+          197.493
+        ],
+        [
+          191.057,
+          191.264
+        ],
+        [
+          160.285,
+          153.445
+        ],
+        [
+          206.174,
+          212.427
+        ],
+        [
+          184.823,
+          200.671
+        ],
+        [
+          184.296,
+          178.676
+        ],
+        [
+          187.1,
+          195.5
+        ]
+      ],
+      "deaths": 8,
+      "distance_travelled": 2635.453304,
+      "enemy_crystal_closest_frame": 2621,
+      "enemy_crystal_closest_hp": 10.0,
+      "enemy_crystal_min_distance": 120.986986,
+      "number": 3,
+      "stationary_ratio": 0.151136
+    },
+    {
+      "alive_frames": 4705,
+      "alive_ratio": 0.784167,
+      "ball_carry_frames": 0,
+      "death_positions": [
+        [
+          186.875,
+          195.496
+        ],
+        [
+          173.677,
+          169.943
+        ],
+        [
+          126.554,
+          130.323
+        ],
+        [
+          101.019,
+          93.555
+        ],
+        [
+          149.538,
+          144.872
+        ],
+        [
+          185.691,
+          215.909
+        ],
+        [
+          106.7,
+          95.5
+        ],
+        [
+          185.065,
+          184.723
+        ],
+        [
+          195.3,
+          224.5
+        ]
+      ],
+      "deaths": 9,
+      "distance_travelled": 3453.616227,
+      "enemy_crystal_closest_frame": 2674,
+      "enemy_crystal_closest_hp": 5.0,
+      "enemy_crystal_min_distance": 38.727027,
+      "number": 5,
+      "stationary_ratio": 0.004898
+    },
+    {
+      "alive_frames": 4705,
+      "alive_ratio": 0.784167,
+      "ball_carry_frames": 0,
+      "death_positions": [
+        [
+          186.875,
+          195.496
+        ],
+        [
+          173.677,
+          169.943
+        ],
+        [
+          126.554,
+          130.323
+        ],
+        [
+          101.019,
+          93.555
+        ],
+        [
+          149.538,
+          144.872
+        ],
+        [
+          185.691,
+          215.909
+        ],
+        [
+          106.7,
+          95.5
+        ],
+        [
+          185.065,
+          184.723
+        ],
+        [
+          195.3,
+          224.5
+        ]
+      ],
+      "deaths": 9,
+      "distance_travelled": 3453.616227,
+      "enemy_crystal_closest_frame": 2674,
+      "enemy_crystal_closest_hp": 5.0,
+      "enemy_crystal_min_distance": 38.727027,
+      "number": 7,
+      "stationary_ratio": 0.004898
+    },
+    {
+      "alive_frames": 4705,
+      "alive_ratio": 0.784167,
+      "ball_carry_frames": 0,
+      "death_positions": [
+        [
+          186.875,
+          195.496
+        ],
+        [
+          173.677,
+          169.943
+        ],
+        [
+          126.554,
+          130.323
+        ],
+        [
+          101.019,
+          93.555
+        ],
+        [
+          149.538,
+          144.872
+        ],
+        [
+          185.691,
+          215.909
+        ],
+        [
+          106.7,
+          95.5
+        ],
+        [
+          185.065,
+          184.723
+        ],
+        [
+          195.3,
+          224.5
+        ]
+      ],
+      "deaths": 9,
+      "distance_travelled": 3453.616227,
+      "enemy_crystal_closest_frame": 2674,
+      "enemy_crystal_closest_hp": 5.0,
+      "enemy_crystal_min_distance": 38.727027,
+      "number": 9,
+      "stationary_ratio": 0.004898
+    }
+  ]
+}
