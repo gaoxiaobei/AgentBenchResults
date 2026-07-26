@@ -1,0 +1,117 @@
+{
+  "agent": "ifelse_trajectory_v17",
+  "benchmark_status": "valid",
+  "best_elo": null,
+  "config": {
+    "candidate_input": "source",
+    "claim_level": "screening",
+    "duration_s": 60,
+    "profile": "quick",
+    "repeats": 1,
+    "seed": 20260723
+  },
+  "created": "2026-07-26T02:36:16Z",
+  "doto": {
+    "aggregate": {
+      "attempted_games": 4,
+      "deaths": 13,
+      "draws": 0,
+      "errors": 0,
+      "goals": 4,
+      "losses": 3,
+      "mean_candidate_score": 124.08333333333333,
+      "mean_opponent_score": 150.91666666666666,
+      "mean_score_ratio": 0.45084574470913463,
+      "pickups": 5,
+      "score_rate": 0.25,
+      "valid_games": 4,
+      "wins": 1
+    },
+    "by_faction": {
+      "0": {
+        "attempted_games": 2,
+        "deaths": 6,
+        "draws": 0,
+        "errors": 0,
+        "goals": 2,
+        "losses": 1,
+        "mean_candidate_score": 118.75,
+        "mean_opponent_score": 158.25,
+        "mean_score_ratio": 0.42770464025026067,
+        "pickups": 3,
+        "score_rate": 0.5,
+        "valid_games": 2,
+        "wins": 1
+      },
+      "1": {
+        "attempted_games": 2,
+        "deaths": 7,
+        "draws": 0,
+        "errors": 0,
+        "goals": 2,
+        "losses": 2,
+        "mean_candidate_score": 129.41666666666666,
+        "mean_opponent_score": 143.58333333333331,
+        "mean_score_ratio": 0.4739868491680086,
+        "pickups": 2,
+        "score_rate": 0.0,
+        "valid_games": 2,
+        "wins": 0
+      }
+    },
+    "by_opponent": {
+      "public_a": {
+        "attempted_games": 2,
+        "deaths": 8,
+        "draws": 0,
+        "errors": 0,
+        "goals": 2,
+        "losses": 1,
+        "mean_candidate_score": 135.91666666666666,
+        "mean_opponent_score": 139.08333333333331,
+        "mean_score_ratio": 0.4937720458553792,
+        "pickups": 2,
+        "score_rate": 0.5,
+        "valid_games": 2,
+        "wins": 1
+      },
+      "public_b": {
+        "attempted_games": 2,
+        "deaths": 5,
+        "draws": 0,
+        "errors": 0,
+        "goals": 2,
+        "losses": 2,
+        "mean_candidate_score": 112.25,
+        "mean_opponent_score": 162.75,
+        "mean_score_ratio": 0.4079194435628901,
+        "pickups": 3,
+        "score_rate": 0.0,
+        "valid_games": 2,
+        "wins": 0
+      }
+    },
+    "claim_level": "screening",
+    "profile": "quick"
+  },
+  "elo_history": [],
+  "final_elo": null,
+  "finished_at": 1785033649.5157368,
+  "game": "23_doto",
+  "git_commit": "fedff51",
+  "h2h": {
+    "ifelse_trajectory_v17": {
+      "public_a": 0.5,
+      "public_b": 0.0
+    }
+  },
+  "resource_summary": {},
+  "run_id": "20260726_0236_cf6d484f",
+  "run_type": "eval",
+  "started_at": 1785033376.5918837,
+  "total_episodes": 4,
+  "total_reward": 1.0,
+  "total_steps": 4800,
+  "wall_hours": 0.08,
+  "win_rate": 0.25
+}

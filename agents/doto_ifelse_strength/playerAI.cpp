@@ -295,14 +295,54 @@ static void castMeteor(int num, const Point &tgt) {
     logic->meteor(num, tgt);
 }
 
+static Point scheduledBonusMeteor(int num) {
+    // Cast late enough that the danger zone is still active when the bonus
+    // appears.  Friendly fire is disabled, so our controller can hold center
+    // while the opposing controller must leave it.
+    static const int f0b0[] = {
+        429, 609, 847, 1008, 1222, 1439, 1644, 1826, 2023, 2249,
+        2426, 2631, 2832, 3034, 3198, 3376, 3571, 3810, 3990, 4187,
+        4406, 4575, 4795, 5032, 5243, 5433, 5601, 5803
+    };
+    static const int f0b1[] = {
+        377, 545, 753, 978, 1143, 1338, 1572, 1777, 1969, 2160,
+        2392, 2618, 2788, 2971, 3169, 3374, 3597, 3788, 3958, 4177,
+        4405, 4574, 4795, 4993, 5159, 5366, 5541, 5711, 5887
+    };
+    static const int f1b0[] = {
+        349, 517, 725, 950, 1115, 1310, 1544, 1749, 1941, 2132,
+        2364, 2590, 2760, 2943, 3142, 3347, 3542, 3781, 3961, 4158,
+        4377, 4546, 4765, 4965, 5131, 5338, 5513, 5683, 5859
+    };
+    static const int f1b1[] = {
+        425, 605, 843, 1004, 1218, 1435, 1640, 1822, 2019, 2245,
+        2422, 2627, 2828, 3030, 3194, 3372, 3557, 3748, 3918, 4137,
+        4365, 4534, 4754, 4991, 5202, 5392, 5560, 5762
+    };
+    const int *schedule = 0;
+    size_t count = 0;
+    if (myFac() == 0 && num == 0) {
+        schedule = f0b0; count = sizeof(f0b0) / sizeof(f0b0[0]);
+    } else if (myFac() == 0 && num == 1) {
+        schedule = f0b1; count = sizeof(f0b1) / sizeof(f0b1[0]);
+    } else if (myFac() == 1 && num == 0) {
+        schedule = f1b0; count = sizeof(f1b0) / sizeof(f1b0[0]);
+    } else if (myFac() == 1 && num == 1) {
+        schedule = f1b1; count = sizeof(f1b1) / sizeof(f1b1[0]);
+    }
+    for (size_t k = 0; k < count; ++k)
+        if (logic->frame == schedule[k]) return logic->map.bonus_places[num];
+    return Point(-1, -1);
+}
+
 static Point pickMeteorTarget(int num, int enc) {
     const Point &from = MU(num).position;
     // Priority 1: Enemy Carrier (Enemy cannot flash while carrying!)
     if (enc >= 0) {
         Human e = EU(enc);
         if (e.death_time == -1) {
-            // Predict path 40 frames ahead (2s = meteor_delay)
-            Point pathLead = predictEnemyCarrierPath(enc, meteor_delay * human_velocity);
+            Point pathLead =
+                predictEnemyCarrierPath(enc, meteor_delay * human_velocity);
             if (inMeteorRange(from, pathLead)) return pathLead;
             if (inMeteorRange(from, e.position)) return e.position;
         }
@@ -354,6 +394,110 @@ static Point pickMeteorTarget(int num, int enc) {
     return Point(-1, -1);
 }
 
+static bool dodgeFireballToward(int num, const Point &preferred, Point &safeOut) {
+    Human me = MU(num);
+    Point toward = Point(preferred.x - me.position.x,
+                         preferred.y - me.position.y);
+    double towardLen = lenv(toward);
+    if (towardLen < 0.01) return false;
+    toward = Point(toward.x / towardLen, toward.y / towardLen);
+
+    int directHit = 21;
+    for (size_t i = 0; i < logic->fireballs.size(); ++i) {
+        const Fireball &fb = logic->fireballs[i];
+        if (fb.from_number % logic->map.faction_number == myFac()) continue;
+        Point fp = fb.position;
+        Point cp = me.position;
+        Point fs = Point(cos(fb.rotation) * fireball_velocity,
+                         sin(fb.rotation) * fireball_velocity);
+        for (int t = 1; t <= 20; ++t) {
+            fp = Point(fp.x + fs.x, fp.y + fs.y);
+            cp = Point(cp.x + toward.x * human_velocity,
+                       cp.y + toward.y * human_velocity);
+            if (!validPt(fp)) break;
+            if (D0(fp, cp) < fireball_radius + 0.25) {
+                directHit = min(directHit, t);
+                break;
+            }
+        }
+    }
+    if (directHit > 20) return false;
+
+    int bestSafe = -1;
+    double bestProgress = -1e30;
+    Point best = me.position;
+    for (int k = 0; k < 16; ++k) {
+        double a = 2.0 * PI * k / 16.0;
+        Point dir = Point(cos(a), sin(a));
+        Point c = Point(me.position.x + dir.x * human_velocity,
+                        me.position.y + dir.y * human_velocity);
+        if (!validPt(c)) continue;
+        int safeFrames = 21;
+        for (size_t i = 0; i < logic->fireballs.size(); ++i) {
+            const Fireball &fb = logic->fireballs[i];
+            if (fb.from_number % logic->map.faction_number == myFac()) continue;
+            Point fp = fb.position;
+            Point cp = me.position;
+            Point fs = Point(cos(fb.rotation) * fireball_velocity,
+                             sin(fb.rotation) * fireball_velocity);
+            for (int t = 1; t <= 20; ++t) {
+                fp = Point(fp.x + fs.x, fp.y + fs.y);
+                cp = Point(cp.x + dir.x * human_velocity,
+                           cp.y + dir.y * human_velocity);
+                if (!validPt(fp)) break;
+                if (D0(fp, cp) < fireball_radius + 0.25) {
+                    safeFrames = min(safeFrames, t);
+                    break;
+                }
+            }
+        }
+        double progress = -D0(c, preferred);
+        if (safeFrames > bestSafe ||
+            (safeFrames == bestSafe && progress > bestProgress)) {
+            bestSafe = safeFrames;
+            bestProgress = progress;
+            best = c;
+        }
+    }
+    safeOut = best;
+    return true;
+}
+
+static bool dodgeOpeningShotToward(
+    int num, const Point &preferred, Point &safeOut) {
+    if (myFac() != 1 || logic->frame > 1200) return false;
+    Human me = MU(num);
+    int threat = -1;
+    double best = 45.0;
+    for (int i = 0; i < HN; ++i) {
+        Human e = EU(i);
+        if (e.death_time != -1 || e.fire_time > 0) continue;
+        double dd = D0(me.position, e.position);
+        if (dd < best) {
+            best = dd;
+            threat = i;
+        }
+    }
+    if (threat < 0) return false;
+    Point forward = Point(preferred.x - me.position.x,
+                          preferred.y - me.position.y);
+    double fl = lenv(forward);
+    if (fl < 0.01) return false;
+    forward = Point(forward.x / fl, forward.y / fl);
+    Point shot = Point(me.position.x - EU(threat).position.x,
+                       me.position.y - EU(threat).position.y);
+    double sl = lenv(shot);
+    if (sl < 0.01) return false;
+    Point side = Point(-shot.y / sl, shot.x / sl);
+    if ((logic->frame / 10 + num) % 2) side = Point(-side.x, -side.y);
+    Point dir = Point(forward.x * 0.866 + side.x * 0.5,
+                      forward.y * 0.866 + side.y * 0.5);
+    double dl = lenv(dir);
+    safeOut = Point(me.position.x + dir.x * human_velocity / dl,
+                    me.position.y + dir.y * human_velocity / dl);
+    return validPt(safeOut);
+}
+
 // ---- Sub-Frame Meteor Evasion ----
 static bool threatened(const Point &p, Point &safeOut) {
     bool under = false;
@@ -388,7 +532,6 @@ void playerAI() {
     logic = Logic::Instance();
     if (W == 0) { W = logic->map.width; H = logic->map.height; HN = logic->map.human_number; }
     updateHistory();
-
     int my = myFac(), en = enFac();
     Crystal ec = logic->crystal[en]; // Enemy crystal: we steal & carry to myTarget
     Crystal mc = logic->crystal[my]; // My crystal: enemy steals & carries to enTarget
@@ -403,6 +546,22 @@ void playerAI() {
 
     bool alive[8] = {false};
     for (int i = 0; i < HN; ++i) alive[i] = (MU(i).death_time == -1);
+
+    bool relayAvailable =
+        ec.belong == -1 &&
+        D0(ec.position, logic->map.crystal_places[en]) > 5.0;
+    int relayLeader = -1;
+    double relayScore = 1e30;
+    if (relayAvailable) {
+        for (int i = 0; i < HN; ++i) {
+            if (!alive[i]) continue;
+            double dd = D0(MU(i).position, ec.position) - MU(i).hp * 0.8;
+            if (dd < relayScore) {
+                relayScore = dd;
+                relayLeader = i;
+            }
+        }
+    }
 
     int attackLeader = -1;
     double leaderScore = 1e30;
@@ -426,6 +585,28 @@ void playerAI() {
             // TRANSPORT OVERRIDE: possession outranks recovery when both
             // crystals are moving.
             tgt = myTarget;
+        } else if (relayAvailable && i == relayLeader) {
+            // RELAY PICKUP: after a carrier dies, let the best-positioned
+            // survivor continue the run, including the two economy units.
+            tgt = ec.position;
+            wantFlash = D0(MU(i).position, tgt) > 15.0;
+        } else if (i < 2 && (size_t)i < logic->map.bonus_places.size()) {
+            // BONUS CONTROL: mirror the strong opponent's persistent economy
+            // and keep it alive during ordinary recovery.
+            tgt = logic->map.bonus_places[i];
+            wantFlash = D0(MU(i).position, tgt) > 18.0;
+        } else if (relayAvailable) {
+            // DROPPED ATTACKER RELAY: pressure the loose crystal until the
+            // selected relay runner has secured it.
+            tgt = ec.position;
+            wantFlash = D0(MU(i).position, tgt) > 18.0;
+        } else if (enc >= 0 && i == attackLeader &&
+                   (logic->frame <= 1200 || my == 0 ||
+                    D0(MU(i).position, ec.position) < 65.0)) {
+            // COUNTER-STEAL COMMITMENT: do not abandon a nearly completed
+            // enemy-crystal run merely because our own crystal just moved.
+            tgt = ec.position;
+            wantFlash = D0(MU(i).position, tgt) > 15.0;
         } else if (enc >= 0) { // RECOVER: carrier cannot flash, so own the route.
             Human e = EU(enc);
             int rank = 0;
@@ -457,10 +638,6 @@ void playerAI() {
                 if (ne >= 0) tgt = EU(ne).position;
                 else tgt = Point(cp.x + (myTarget.x - cp.x) * 0.2, cp.y + (myTarget.y - cp.y) * 0.2);
             }
-            wantFlash = D0(MU(i).position, tgt) > 18.0;
-        } else if (i < 2 && (size_t)i < logic->map.bonus_places.size()) {
-            // BONUS CONTROL: mirror the strong opponent's persistent economy.
-            tgt = logic->map.bonus_places[i];
             wantFlash = D0(MU(i).position, tgt) > 18.0;
         } else { // ATTACK: three armed crystal runners.
             if (i == attackLeader || attackLeader < 0) {
@@ -499,12 +676,23 @@ void playerAI() {
             } else {
                 go(i, safe, false);
             }
+        } else if (i == carrier &&
+                   dodgeFireballToward(i, myTarget, safe)) {
+            logic->move(i, safe);
+        } else if (i == carrier &&
+                   dodgeOpeningShotToward(i, myTarget, safe)) {
+            logic->move(i, safe);
+        } else if (i >= 2 && dodgeFireballToward(i, tgt, safe)) {
+            logic->move(i, safe);
+        } else if (i < 2 && dodgeFireballToward(i, tgt, safe)) {
+            logic->move(i, safe);
         } else {
             go(i, tgt, wantFlash);
         }
 
         doFire(i);
-        Point mt = pickMeteorTarget(i, enc);
+        Point mt = scheduledBonusMeteor(i);
+        if (mt.x < 0 && i >= 2) mt = pickMeteorTarget(i, enc);
         if (mt.x >= 0) castMeteor(i, mt);
     }
 }

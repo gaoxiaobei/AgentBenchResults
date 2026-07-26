@@ -1,0 +1,19 @@
+[run]
+run_id = "20260726_0236_cf6d484f"
+game = "23_doto"
+agent = "ifelse_trajectory_v17"
+type = "eval"
+created = "2026-07-26T02:36:16Z"
+git_commit = "fedff51"
+started_at = 1785033376.5918837
+finished_at = 1785033649.5157368
+total_steps = 4800
+total_episodes = 4
+
+[config]
+profile = "quick"
+claim_level = "screening"
+duration_s = 60
+repeats = 1
+seed = 20260723
+candidate_input = "source"
