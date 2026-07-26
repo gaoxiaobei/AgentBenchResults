@@ -602,6 +602,7 @@ void playerAI() {
             wantFlash = D0(MU(i).position, tgt) > 18.0;
         } else if (enc >= 0 && i == attackLeader &&
                    (logic->frame <= 1200 || my == 0 ||
+                    D0(EU(enc).position, enTarget) > 90.0 ||
                     D0(MU(i).position, ec.position) < 65.0)) {
             // COUNTER-STEAL COMMITMENT: do not abandon a nearly completed
             // enemy-crystal run merely because our own crystal just moved.

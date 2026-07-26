@@ -47,6 +47,7 @@ class DotoIfElseSourceTest(unittest.TestCase):
         self.assertIn("RELAY PICKUP", source)
         self.assertIn("COUNTER-STEAL COMMITMENT", source)
         self.assertIn("(logic->frame <= 1200 || my == 0 ||", source)
+        self.assertIn("D0(EU(enc).position, enTarget) > 90.0", source)
         self.assertIn("D0(MU(i).position, ec.position) < 65.0", source)
         self.assertIn("static Point scheduledBonusMeteor", source)
         self.assertIn("429, 609, 847, 1008, 1222", source)
